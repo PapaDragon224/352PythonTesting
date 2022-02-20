@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import Mock
 from library import library
 import json
+from patron import Patron
 
 
 class TestLibrary(unittest.TestCase):
@@ -28,7 +29,59 @@ class TestLibrary(unittest.TestCase):
         self.assertTrue(self.lib.is_book_by_author('Smith', 'Learning Python'))
         self.lib.api.books_by_author.assert_called_once_with('Smith')
 
-    def test_is_book_by_author_true(self):
+    def test_is_book_by_author_false(self):
         self.lib.api.books_by_author = Mock(return_value=['Not Learning Python'])
         self.assertFalse(self.lib.is_book_by_author('Johnson', 'Learning Python'))
         self.lib.api.books_by_author.assert_called_once_with('Johnson')
+
+    def test_get_languages_for_book(self):
+        self.lib.api.get_book_info = Mock(return_value=[{'title': 'Learning Python', 'language': ['eng']}])
+        self.assertEqual({'eng'}, self.lib.get_languages_for_book('learning python'))
+        self.lib.api.get_book_info.assert_called_once_with('learning python')
+
+    def test_register_patron(self):
+        self.lib.db.insert_patron = Mock(return_value=1)
+        self.assertEqual(self.lib.register_patron('first', 'last', 18, 1), 1)
+        self.lib.db.insert_patron.assert_called_once()
+
+    def test_is_patron_registered_true(self):
+        self.lib.db.retrieve_patron = Mock(return_value=Patron('first', 'last', 18, 1))
+        self.assertTrue(self.lib.is_patron_registered(1))
+        self.lib.db.retrieve_patron.assert_called_once_with(1)
+
+    def test_is_patron_registered_false(self):
+        self.lib.db.retrieve_patron = Mock(return_value=None)
+        self.assertFalse(self.lib.is_patron_registered(1))
+        self.lib.db.retrieve_patron.assert_called_once_with(1)
+
+    def test_borrow_book(self):
+        name = "Learning Python"
+        patron = Patron('first', 'last', 18, 1)
+        patron.add_borrowed_book = Mock()
+        self.lib.db.update_patron = Mock()
+        self.lib.borrow_book(name, patron)
+        patron.add_borrowed_book.assert_called_once_with(name.lower())
+        self.lib.db.update_patron.assert_called_once_with(patron)
+
+    def test_return_borrowed_book(self):
+        name = "Learning Python"
+        patron = Patron('first', 'last', 18, 1)
+        patron.return_borrowed_book = Mock()
+        self.lib.db.update_patron = Mock()
+        self.lib.return_borrowed_book(name, patron)
+        patron.return_borrowed_book.assert_called_once_with(name.lower())
+        self.lib.db.update_patron.assert_called_once_with(patron)
+
+    def test_is_book_borrowed_true(self):
+        name = "Learning Python"
+        patron = Patron('first', 'last', 18, 1)
+        patron.get_borrowed_books = Mock(return_value={'Learning Python'})
+        self.assertTrue(self.lib.is_book_borrowed(name, patron))
+        patron.get_borrowed_books.assert_called_once()
+
+    def test_is_book_borrowed_false(self):
+        name = "Learning Python"
+        patron = Patron('first', 'last', 18, 1)
+        patron.get_borrowed_books = Mock(return_value={'A Different Book'})
+        self.assertFalse(self.lib.is_book_borrowed(name, patron))
+        patron.get_borrowed_books.assert_called_once()
