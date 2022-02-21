@@ -44,6 +44,12 @@ class TestLibbraryDBInterface(unittest.TestCase):
         self.db_interface.update_patron(Mock())
         db_update_mock.assert_called()
 
+    def test_update_patron_with_none(self):
+        self.assertEqual(self.db_interface.update_patron(None), None)
+
+    def test_insert_patron_with_none(self):
+        self.assertEqual(self.db_interface.insert_patron(None), None)
+
     def test_convert_patron_to_db_format(self):
         patron_mock = Mock()
 
@@ -61,6 +67,7 @@ class TestLibbraryDBInterface(unittest.TestCase):
         self.assertEqual(self.db_interface.retrieve_patron(4), None)
 
     def test_retrieve_person(self):
+
         patron_mock = Mock()
 
         patron_mock.get_fname = Mock(return_value=1)
