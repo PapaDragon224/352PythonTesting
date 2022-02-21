@@ -80,3 +80,7 @@ class TestLibbraryDBInterface(unittest.TestCase):
         self.db_interface.retrieve_patron = Mock(return_value=formatted_patron)
         self.assertEqual(self.db_interface.retrieve_patron(3), formatted_patron)
 
+    def test_is_closed(self):
+        self.db_interface.close_db()
+        self.assertEqual(self.db_interface.db._opened, False)
+
