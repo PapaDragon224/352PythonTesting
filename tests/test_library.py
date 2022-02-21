@@ -46,12 +46,14 @@ class TestLibrary(unittest.TestCase):
 
     def test_is_patron_registered_true(self):
         self.lib.db.retrieve_patron = Mock(return_value=Patron('first', 'last', 18, 1))
-        self.assertTrue(self.lib.is_patron_registered(1))
+        patron = Patron('first', 'last', 18, 1)
+        self.assertTrue(self.lib.is_patron_registered(patron))
         self.lib.db.retrieve_patron.assert_called_once_with(1)
 
     def test_is_patron_registered_false(self):
         self.lib.db.retrieve_patron = Mock(return_value=None)
-        self.assertFalse(self.lib.is_patron_registered(1))
+        patron = Patron('first', 'last', 18, 1)
+        self.assertFalse(self.lib.is_patron_registered(patron))
         self.lib.db.retrieve_patron.assert_called_once_with(1)
 
     def test_borrow_book(self):
@@ -75,13 +77,13 @@ class TestLibrary(unittest.TestCase):
     def test_is_book_borrowed_true(self):
         name = "Learning Python"
         patron = Patron('first', 'last', 18, 1)
-        patron.get_borrowed_books = Mock(return_value={'Learning Python'})
+        patron.get_borrowed_books = Mock(return_value=[name.lower()])
         self.assertTrue(self.lib.is_book_borrowed(name, patron))
         patron.get_borrowed_books.assert_called_once()
 
     def test_is_book_borrowed_false(self):
         name = "Learning Python"
         patron = Patron('first', 'last', 18, 1)
-        patron.get_borrowed_books = Mock(return_value={'A Different Book'})
+        patron.get_borrowed_books = Mock(return_value=['a different book'])
         self.assertFalse(self.lib.is_book_borrowed(name, patron))
         patron.get_borrowed_books.assert_called_once()
