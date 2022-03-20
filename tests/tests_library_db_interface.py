@@ -130,3 +130,14 @@ class TestLibbraryDBInterface(unittest.TestCase):
 
     def test_is_named_db_json(self):
         self.assertEqual(self.db_interface.DATABASE_FILE, "db.json")
+
+
+    def test_insert_patron_not_in_mutant(self):
+        patron_mock = Mock()
+        self.db_interface.retrieve_patron = Mock(return_value=None)
+        data = {'fname': 'name', 'lname': 'name', 'age': 'age', 'memberID': 'memberID',
+                'borrowed_books': []}
+        self.db_interface.convert_patron_to_db_format = Mock(return_value=data)
+        self.db_interface.db.insert = Mock(return_value=10)
+        self.db_interface.insert_patron(patron_mock)
+        assert call(None) not in self.db_interface.db.insert.mock_calls
