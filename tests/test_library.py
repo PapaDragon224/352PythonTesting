@@ -9,7 +9,7 @@ class TestLibrary(unittest.TestCase):
     def setUp(self):
         self.lib = library.Library()
         # self.books_data = [{'title': 'Learning Python', 'ebook_count': 3}, {'title': 'Learning Python (Learning)', 'ebook_count': 1}, {'title': 'Learning Python', 'ebook_count': 1}, {'title': 'Learn to Program Using Python', 'ebook_count': 1}, {'title': 'Aprendendo Python', 'ebook_count': 1}, {'title': 'Python Basics', 'ebook_count': 1}]
-        with open(os.getcwd() + '/../tests_data/ebooks.txt', 'r') as f:
+        with open(os.getcwd() + '/tests_data/ebooks.txt', 'r') as f:
             self.books_data = json.loads(f.read())
 
     def test_is_ebook_true(self):
@@ -40,7 +40,15 @@ class TestLibrary(unittest.TestCase):
         self.lib.api.get_book_info.assert_called_once_with('learning python')
 
     def test_register_patron(self):
+        def assert_patron_correct(patron):
+            self.assertIsNotNone(patron)
+            self.assertEqual(patron.fname, 'first')
+            self.assertEqual(patron.lname, 'last')
+            self.assertEqual(patron.age, 18)
+            self.assertEqual(patron.memberID, 1)
+            return unittest.mock.DEFAULT
         self.lib.db.insert_patron = Mock(return_value=1)
+        self.lib.db.insert_patron.side_effect = assert_patron_correct
         self.assertEqual(self.lib.register_patron('first', 'last', 18, 1), 1)
         self.lib.db.insert_patron.assert_called_once()
 
