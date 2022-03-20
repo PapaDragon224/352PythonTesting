@@ -7,6 +7,9 @@ class TestLibbraryDBInterface(unittest.TestCase):
     def setUp(self):
         self.db_interface = library_db_interface.Library_DB()
 
+    def tearDown(self):
+        self.db_interface.close_db()
+
     def test_insert_patron_not_in_db(self):
         patron_mock = Mock()
         self.db_interface.retrieve_patron = Mock(return_value=None)
